@@ -1,3 +1,12 @@
+import subprocess
+import sys
+
+# ХАК: Автоматический круглосуточный запуск Telegram-бота на бесплатном хостинге
+try:
+    subprocess.Popen([sys.executable, "bot.py"])
+except Exception as e:
+    pass
+
 import os
 import streamlit as st
 
@@ -8,8 +17,11 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. Кастомные CSS-стили для тёмной темы
+# 2. Кастомные CSS-стили для тёмной темы и ВЕРИФИКАЦИЯ ЯНДЕКСА
 st.markdown("""
+    <!-- Специфический тег Яндекса, внедренный в верстку -->
+    <meta name="yandex-verification" content="871b8699e77af33e" />
+    
     <style>
     .stApp {
         background-color: #0D0D11 !important;
