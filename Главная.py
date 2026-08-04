@@ -1,16 +1,4 @@
 import os
-import sys
-import subprocess
-
-# СЕКРЕТНЫЙ ХАК: Принудительный запуск Telegram-бота на хостинге Streamlit
-if "bot_started" not in os.environ:
-    try:
-        os.environ["bot_started"] = "true"
-        # Запускаем bot.py в фоновом режиме, чтобы он не вешал работу самого сайта
-        subprocess.Popen([sys.executable, "bot.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except:
-        pass
-
 import streamlit as st
 
 # 1. Настройка вкладки браузера
@@ -20,22 +8,44 @@ st.set_page_config(
     layout="centered"
 )
 
-# 2. Кастомные CSS-стили для тёмной темы и ВЕРИФИКАЦИЯ ЯНДЕКСА
+# 2. Кастомные CSS-стили для тёмной темы и верификация Яндекса
 st.markdown("""
     <!-- Специфический тег Яндекса, внедренный в верстку -->
     <meta name="yandex-verification" content="871b8699e77af33e" />
     
     <style>
+    /* Глубокий космический фон */
     .stApp {
-        background-color: #0D0D11 !important;
+        background-color: #0A0A0E !important;
         color: #FFFFFF !important;
     }
+    
+    /* Сочные неоновые разделители вместо серых полос */
+    hr {
+        border: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #7B2CBF, #00B4D8, transparent);
+        margin: 40px 0 !important;
+    }
+    
+    /* Плашка акций */
     .promo-box {
-        background-color: #1A1A24;
+        background: linear-gradient(135deg, #12121A, #1A1A26);
         border-left: 5px solid #00B4D8;
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 0 15px rgba(0, 180, 216, 0.2);
+    }
+    
+    /* Красивые карточки для этапов работы */
+    .step-card {
+        background: #14141F;
+        border: 1px solid #24243A;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -51,7 +61,7 @@ for file in os.listdir("."):
 if banner_file:
     st.image(banner_file, use_container_width=True)
 else:
-    st.title("🔥 Уникальная ИИ-инфографика для WB / Ozon")
+    st.markdown("<h1 style='color: #00B4D8; text-shadow: 0 0 10px rgba(0,180,216,0.5);'>🔥 Уникальная ИИ-инфографика для WB / Ozon</h1>", unsafe_allow_html=True)
 
 st.write("""
 Забудьте про унылые и заезженные бесплатные шаблоны, которые покупатели просто пролистывают. 
@@ -65,23 +75,33 @@ st.divider()
 st.header("🔥 Мега-Акции этой недели")
 st.markdown("""
 <div class="promo-box">
-    <h3 style='color: #00B4D8; margin-top:0; font-size:18px;'>🎁 Акция "Быстрый Старт"</h3>
-    <p style='margin:0;'>При заказе полной воронки от 5 слайдов — <b>Маркетинговый анализ 3 главных конкурентов</b> в вашей нише сделаю абсолютно БЕСПЛАТНО!</p>
+    <h3 style='color: #00B4D8; margin-top:0; font-size:18px; text-shadow: 0 0 10px rgba(0,180,216,0.3);'>🎁 Акция "Быстрый Старт"</h3>
+    <p style='margin:0; opacity: 0.9;'>При заказе полной воронки от 5 слайдов — <b>Маркетинговый анализ 3 главных конкурентов</b> в вашей нише сделаю абсолютно БЕСПЛАТНО!</p>
 </div>
 <div class="promo-box">
-    <h3 style='color: #7B2CBF; margin-top:0; font-size:18px;'>⚡️ Акция "Оптом Дешевле"</h3>
-    <p style='margin:0;'>Заказываете инфографику сразу для 3 разных товаров? Получите фиксированную скидку <b>-15% на весь чек</b>!</p>
+    <h3 style='color: #7B2CBF; margin-top:0; font-size:18px; text-shadow: 0 0 10px rgba(123,44,191,0.3);'>⚡️ Акция "Оптом Дешевле"</h3>
+    <p style='margin:0; opacity: 0.9;'>Заказываете инфографику сразу для 3 разных товаров? Получите фиксированную скидку <b>-15% на весь чек</b>!</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.divider()
 
-# 5. Визуальные плашки этапов сотрудничества
+# 5. Визуальные плашки этапов сотрудничества в неоновом стиле
 st.header("🛠 Как строится процесс работы?")
-st.success("1️⃣ **Обсуждение ТЗ** — Вы присылаете фото товара и основные тезисы.")
-st.info("2️⃣ **Предоплата** — Вносите 50% предоплаты для запуска API нейросети.")
-st.warning("3️⃣ **Генерация и правки** — Смотрите готовые варианты с ватермаркой.")
-st.error("4️⃣ **Получение оригинала** — Оплата оставшихся 50% и отправка файлов в 4K.")
+st.markdown("""
+<div class="step-card" style="border-left: 4px solid #2ECC71;">
+    <span style="color:#2ECC71; font-weight:bold;">1️⃣ Обсуждение ТЗ</span> — Вы присылаете фото товара и основные тезисы.
+</div>
+<div class="step-card" style="border-left: 4px solid #3498DB;">
+    <span style="color:#3498DB; font-weight:bold;">2️⃣ Предоплата</span> — Вносите 50% предоплаты для запуска API нейросети.
+</div>
+<div class="step-card" style="border-left: 4px solid #F1C40F;">
+    <span style="color:#F1C40F; font-weight:bold;">3️⃣ Генерация и правки</span> — Смотрите готовые варианты с ватермаркой.
+</div>
+<div class="step-card" style="border-left: 4px solid #E74C3C;">
+    <span style="color:#E74C3C; font-weight:bold;">4️⃣ Получение оригинала</span> — Оплата оставшихся 50% и отправка файлов в 4K.
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
