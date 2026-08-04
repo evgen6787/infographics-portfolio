@@ -1,112 +1,105 @@
 import telebot
-from g4f.client import Client
+import os
 
-# --- НАСТРОЙКА КЛЮЧЕЙ И ID ---
+# --- НАСТРОЙКА ТОКЕНА И ВАШЕГО ID ---
 TELEGRAM_BOT_TOKEN = "8965640431:AAHVgQfVrj7HFHI2MYbCATAP4fMKwEIGsME"
 YOUR_TELEGRAM_CHAT_ID = 1586057111  # Ваш личный цифровой ID (как число)
 
-# Инициализируем бота и бесплатный клиент ChatGPT
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-ai_client = Client()
 
-# Память контекста диалога для каждого клиента (чтобы ИИ помнил прошлые сообщения)
-user_history = {}
+# Локальная база данных прямо в оперативной памяти бота, чтобы связывать никнеймы с ID чатов
+# Ключ: никнейм в нижнем регистре (без @), Значение: chat_id клиента
+client_database = {}
 
-# Инструкция, обучающая ИИ внутри Telegram-бота
-SYSTEM_PROMPT = """
-Ты — продвинутый ИИ-ассистент студии дизайна InfographicsAI внутри Telegram-бота. 
-Твоя задача — помогать клиентам маркетплейсов отслеживать заказы, принимать от них фотографии товаров и консультировать.
-Отвечай строго на РУССКОМ языке. Будь очень вежлив, дружелюбен, используй эмодзи. 
-Если клиент пишет, что хочет отправить фото — скажи, чтобы он прислал их сюда прямо в чат как картинки или файлы.
-Если клиент спрашивает статус заказа, вежливо ответь: "Передал ваш запрос мастеру! Прямо сейчас дизайнер собирает уникальный неоновый фон. Ожидайте уведомления прямо в этом чате!"
-"""
-
-# 1. ОБРАБОТКА КОМАНДЫ /start
+# 1. ОБРАБОТКА КОМАНДЫ /start ДЛЯ КЛИЕНТОВ
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     chat_id = message.chat.id
-    username = message.from_user.username or message.from_user.first_name
+    # Автоматически сохраняем никнейм клиента в нашу базу при старте
+    username = message.from_user.username
     
-    # Сбрасываем историю для нового диалога
-    user_history[chat_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if username:
+        clean_username = username.lower().strip()
+        client_database[clean_username] = chat_id
+        
+        # Уведомляем вас, что клиент успешно подключился к боту
+        notification = f"🟢 Пользователь @{username} (ID: {chat_id}) успешно запустил бота и готов к диалогу!"
+        bot.send_message(YOUR_TELEGRAM_CHAT_ID, notification)
     
-    welcome_text = f"🎉 Здравствуйте, @{username}! Рад видеть вас в официальном боте студии InfographicsAI!\n\n" \
-                   f"📸 **Сюда вы можете отправить фотографии вашего товара** (файлом или обычным фото).\n\n" \
-                   f"🤖 Наш ИИ-ассистент и мастер уже прорабатывают ваше ТЗ с сайта. Прямо в этом чате вы будете получать уведомления о статусе, закрывать правки и сможете скачать готовые карточки в 4K!"
+    welcome_text = f"🎉 Здравствуйте! Рад видеть вас в официальном боте студии InfographicsAI!\n\n" \
+                   f"📸 **Сюда вы можете отправить фотографии вашего товара** (обычным фото или файлом без сжатия).\n\n" \
+                   f"🤖 Наш менеджер уже изучает ваш бриф с сайта. Прямо в этом чате вы будете получать уведомления от дизайнера, обсуждать правки и сможете скачать готовые карточки в максимальном качестве!"
     
     bot.send_message(chat_id, welcome_text)
 
-# 2. ОБРАБОТКА ПРИСЛАННЫХ ФОТОГРАФИЙ ТОВАРА
+# 2. ПРИЕМ ФОТОГРАФИЙ ОТ КЛИЕНТОВ И ПЕРЕСЫЛКА ВАМ
 @bot.message_handler(content_types=['photo', 'document'])
 def handle_docs_photos(message):
     chat_id = message.chat.id
-    username = message.from_user.username or message.from_user.first_name
+    username = message.from_user.username or "Скрытый_Ник"
     
-    # Бот вежливо отвечает клиенту
+    # Если фото прислали вы сами (Админ) — бот проигнорирует, чтобы не зацикливаться
+    if chat_id == YOUR_TELEGRAM_CHAT_ID:
+        bot.send_message(YOUR_TELEGRAM_CHAT_ID, "💡 Шеф, чтобы отправить файлы конкретному клиенту, просто перешлите их ему через команду с его никнеймом.")
+        return
+        
+    # Сохраняем связь ника и ID на случай, если клиент не нажимал /start, а просто скинул фото
+    if message.from_user.username:
+        client_database[message.from_user.username.lower().strip()] = chat_id
+
+    # Отвечаем клиенту
     bot.send_message(chat_id, "📸 Фотографии вашего товара успешно получены и переданы дизайнеру в обработку! Спасибо!")
     
-    # Бот мгновенно пересылает эти фотографии ВАМ в личные сообщения, чтобы вы их не потеряли
-    notification_text = f"🔔 **КЛИЕНТ ПРИСЛАЛ ФОТО ТОВАРА!**\n👤 От: @{username} (ID: {chat_id})"
+    # Пересылаем файлы вам на телефон с указанием, от кого они пришли
+    notification_text = f"🔔 **КЛИЕНТ ПРИСЛАЛ МАТЕРИАЛЫ ДЛЯ ДИЗАЙНА!**\n👤 От: @{username}\nℹ️ Для ответа введите: `{username} Текст вашего сообщения`"
     bot.send_message(YOUR_TELEGRAM_CHAT_ID, notification_text)
     
     if message.content_type == 'photo':
-        # Пересылаем самую большую версию фото
         bot.send_photo(YOUR_TELEGRAM_CHAT_ID, message.photo[-1].file_id)
     else:
-        # Пересылаем как документ (без сжатия)
         bot.send_document(YOUR_TELEGRAM_CHAT_ID, message.document.file_id)
 
-# 3. УМНЫЙ ИИ-ДИАЛОГ С КЛИЕНТАМИ И УПРАВЛЕНИЕ ДЛЯ ВАС (АДМИНА)
+# 3. ЦЕНТРАЛЬНЫЙ ПУЛЬТ ОБРАТНОЙ СВЯЗИ (МЕНЕДЖЕР КОМАНД)
 @bot.message_handler(func=lambda message: True)
 def handle_all_messages(message):
     chat_id = message.chat.id
-    text = message.text
-    username = message.from_user.username or message.from_user.first_name
-
-    # --- РЕЖИМ АДМИНИСТРАТОРА (Для вас) ---
-    # Если пишет владелец студии (вы) и сообщение начинается с команды /reply
+    text = message.text.strip()
+    
+    # --- РЕЖИМ АДМИНИСТРАТОРА (Ваш пульт управления) ---
     if chat_id == YOUR_TELEGRAM_CHAT_ID:
-        if text.startswith("/reply "):
-            try:
-                # Пример команды: /reply 123456789 Текст вашего ответа
-                parts = text.split(" ", 2)
-                target_chat_id = int(parts[1])
-                admin_text = parts[2]
-                
-                # Отправляем сообщение клиенту на сайт/в бот
-                bot.send_message(target_chat_id, f"👑 **Сообщение от ИИ-Дизайнера:**\n\n{admin_text}")
-                bot.send_message(YOUR_TELEGRAM_CHAT_ID, "✅ Ответ успешно доставлен клиенту!")
-            except Exception as e:
-                bot.send_message(YOUR_TELEGRAM_CHAT_ID, "❌ Ошибка! Неверный формат. Пишите строго так:\n`/reply ID_КЛИЕНТА Текст ответа`")
+        # Проверяем, что сообщение содержит как минимум два слова (Имя_Пользователя и Текст)
+        if " " in text:
+            parts = text.split(" ", 1)
+            target_nick = parts[0].replace("@", "").lower().strip() # Очищаем ник от собачки и пробелов
+            admin_message = parts[1]
+            
+            # Ищем ID чата этого клиента в нашей базе данных
+            if target_nick in client_database:
+                client_chat_id = client_database[target_nick]
+                try:
+                    bot.send_message(client_chat_id, f"👑 **Сообщение от ИИ-Дизайнера:**\n\n{admin_message}")
+                    bot.send_message(YOUR_TELEGRAM_CHAT_ID, f"✅ Ваш ответ успешно доставлен пользователю @{target_nick}!")
+                except Exception as e:
+                    bot.send_message(YOUR_TELEGRAM_CHAT_ID, f"❌ Не удалось отправить сообщение. Возможно, пользователь заблокировал бота.")
+            else:
+                bot.send_message(YOUR_TELEGRAM_CHAT_ID, f"❓ Ошибка! Пользователь `@{target_nick}` еще ни разу не запускал этого бота (не нажимал /start). Попросите его активировать бота, чтобы открыть канал связи!")
         else:
-            bot.send_message(YOUR_TELEGRAM_CHAT_ID, "💡 Шеф, чтобы ответить клиенту, напишите команду:\n`/reply ID_КЛИЕНТА Ваш текст`\n\nID клиента пишется в каждом уведомлении о новом брифе!")
+            bot.send_message(YOUR_TELEGRAM_CHAT_ID, "💡 **Инструкция для Шефа:**\n\nЧтобы написать клиенту, введите его ник и текст через пробел:\n`ivan_seller Привет, макет готов!`")
         return
 
-    # --- РЕЖИМ КЛИЕНТА (Диалог с GPT-4o) ---
-    # Если у пользователя еще нет истории — создаем её
-    if chat_id not in user_history:
-        user_history[chat_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    # --- РЕЖИМ КЛИЕНТА (Сбор входящих сообщений от селлеров для вас) ---
+    if message.from_user.username:
+        client_database[message.from_user.username.lower().strip()] = chat_id
         
-    # Добавляем реплику пользователя в память
-    user_history[chat_id].append({"role": "user", "content": text})
+    client_username = message.from_user.username or "Скрытый_Ник"
     
-    # Показываем статус "бот печатает..."
-    bot.send_chat_action(chat_id, 'typing')
+    # Пересылаем текст клиента вам в ЛС
+    incoming_notification = f"💬 **Новое сообщение от клиента @{client_username}:**\n\n{text}\n\n" \
+                            f"ℹ️ *Чтобы ответить ему, напишите в этот чат:* `{client_username} Ваш ответ`"
+    bot.send_message(YOUR_TELEGRAM_CHAT_ID, incoming_notification)
     
-    try:
-        # Бесплатно вызываем ChatGPT (GPT-4o) через g4f
-        response = ai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=user_history[chat_id]
-        )
-        ai_response = response.choices.message.content
-    except Exception as e:
-        ai_response = "Извините, я немного задумался. Наш ИИ-мастер уже на связи, вы можете задать вопрос ему напрямую в ЛС!"
+    # Отвечаем клиенту заглушкой автоответчика студии
+    bot.send_message(chat_id, "🤖 Ваш запрос зафиксирован и передан мастеру на проработку. Дизайнер ответит вам прямо в этом чате в течение нескольких минут!")
 
-    # Отправляем ответ клиенту и сохраняем его в память
-    bot.send_message(chat_id, ai_response)
-    user_history[chat_id].append({"role": "assistant", "content": ai_response})
-
-# Запуск бота на бесконечные прослушивания сообщений
-print("🚀 Ваш умный ИИ Telegram-бот успешно запущен и слушает команды...")
+print("🚀 Обновленный Telegram-бот обратной связи успешно запущен...")
 bot.infinity_polling()
