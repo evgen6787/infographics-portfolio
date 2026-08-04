@@ -28,6 +28,16 @@ with st.sidebar:
         st.image(banner_file, use_container_width=True)
     st.divider()
     st.markdown("📌 **Навигация по сайту:**")
+    
+    # Принудительная стильная тёмная тема для страницы заказа
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #0D0D11 !important;
+        color: #FFFFFF !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 st.title("🤖 Умный чат-бот для оформления заказа")
 st.write("Привет! Я помогу вам быстро составить ТЗ, выбрать тариф и передам все данные нашему дизайнеру.")
