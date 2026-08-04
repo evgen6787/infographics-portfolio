@@ -1,13 +1,16 @@
-import subprocess
-import sys
-
-# ХАК: Автоматический круглосуточный запуск Telegram-бота на бесплатном хостинге
-try:
-    subprocess.Popen([sys.executable, "bot.py"])
-except Exception as e:
-    pass
-
 import os
+import sys
+import subprocess
+
+# СЕКРЕТНЫЙ ХАК: Принудительный запуск Telegram-бота на хостинге Streamlit
+if "bot_started" not in os.environ:
+    try:
+        os.environ["bot_started"] = "true"
+        # Запускаем bot.py в фоновом режиме, чтобы он не вешал работу самого сайта
+        subprocess.Popen([sys.executable, "bot.py"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except:
+        pass
+
 import streamlit as st
 
 # 1. Настройка вкладки браузера
@@ -105,6 +108,6 @@ with st.expander("Входят ли правки в стоимость?"):
 
 st.divider()
 
-# 8. Финальный призыв к действию (ОБНОВЛЕННЫЙ ПОД ЧАТ-БОТА)
+# 8. Финальный призыв к действию
 st.header("🤝 Как сделать заказ?")
 st.info("💡 Ознакомьтесь с актуальной стоимостью во вкладке **«Цены и Акции»**, а затем перейдите во вкладку **«Сделать Заказ»** в меню слева. Наш умный чат-бот за 1 минуту поможет составить ТЗ и передаст заявку мне напрямую в Telegram!")
