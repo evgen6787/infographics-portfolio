@@ -2,3 +2,6 @@ streamlit
 requests
 g4f
 streamlit-cookies-controller
+streamlit
+requests
+pyTelegramBotAPI
