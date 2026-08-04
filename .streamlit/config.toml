@@ -5,3 +5,9 @@ secondaryBackgroundColor="#1A1A24"
 textColor="#FFFFFF"
 [ui]
 hideTopBar = true
+[theme]
+base="dark"
+
+[browser]
+# Встраиваем метатег верификации Яндекса прямо в заголовок HTML-кода хостинга
+gatherUsageStats = false
