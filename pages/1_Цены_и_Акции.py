@@ -108,7 +108,7 @@ with st.expander("🛠 Панель Владельца Студии"):
     if not st.session_state.admin_authenticated:
         master_pwd = st.text_input("Внесите мастер-пароль:", type="password", placeholder="••••••••", key="admin_pwd_field")
         if st.button("🔓 Войти в пульт"):
-            if master_pwd == "Шеф2026":
+            if master_pwd == "11012012Evgeniy$":
                 st.session_state.admin_authenticated = True
                 st.success("Доступ разрешен!")
                 st.rerun()
