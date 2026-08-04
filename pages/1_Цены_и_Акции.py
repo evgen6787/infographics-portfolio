@@ -113,4 +113,4 @@ with tab3:
 
 st.divider()
 st.header("🤝 Готовы запустить продажи?")
-st.link_button("🚀 ПЕРЕЙТИ В TELEGRAM-КАНАЛ СТУДИИ 🚀", "https://t.me")
+st.link_button("🚀 ПЕРЕЙТИ В TELEGRAM-КАНАЛ СТУДИИ 🚀", "https://t.me/InfographicsAI")
