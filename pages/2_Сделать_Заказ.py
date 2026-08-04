@@ -119,4 +119,4 @@ if st.session_state.get("order_finished", False):
     st.divider()
     st.success("🎯 **Финишируем оформление брифа!**")
     st.write("Чтобы **загрузить фотографии вашего товара**, отслеживать статус готовности карточек в 4K и общаться с дизайнером, запустите нашего официального Telegram-робота прямо сейчас:")
-    st.link_button("🚀 ЗАПУСТИТЬ ТЕЛЕГРАМ-БОТА СТУДИИ 🚀", f"https://t.me{BOT_USERNAME}")
+   st.link_button("🚀 ЗАПУСТИТЬ ТЕЛЕГРАМ-БОТА СТУДИИ 🚀", "https://t.me/my_infographics_ai_bot")
